@@ -12,15 +12,6 @@ title('Angular velocity time history')
 ylabel('angular velocity (rad/s)')
 xlabel('time (s)')
 
-%% Quaternion
-% The quaternion constraint equation is desired for plotting
-K_quat = quat_n(1,:).^2 + quat_n(2,:).^2 + quat_n(3,:).^2 + quat_n(4,:).^2;
-figure
-plot(time,quat_n(1,:),'-',time,quat_n(2,:),'-.',time,quat_n(3,:),'.',time,quat_n(4,:),'-',time,K_quat(:))
-title('Euler parameter time history')
-ylabel('euler parameters')
-xlabel('time (s)')
-
 %% Euler Angle Sets
 figure
 plot(time,theta(1,:))
@@ -34,17 +25,55 @@ title('Nutation angle time history')
 ylabel('nutation angle (degrees)')
 xlabel('time (s)')
 
-
 % figure
 % plot(time,theta(1,:), time,theta(2,:), time,theta(3,:))
 % title('Euler angle set time history')
 % ylabel('euler angles (degrees)')
 % xlabel('time (s)')
 
-%% Euler Angle velocities
+%% Direction Cosine Matrix
+C12 = zeros(1,length(time));
+C32 = zeros(1,length(time));
+C12(:) = C_NtoB(1,2,:);
+C32(:) = C_NtoB(3,2,:);
+
 figure
-plot(time,thetaDot(1,:), time,thetaDot(2,:), time,thetaDot(3,:))
-title('Euler angular rate time history')
-ylabel('euler angular velocities (rad/s)')
-xlabel('time (s)')
+DCMplot = plot(C12,C32);
+title('C32 vs C12')
+ylabel('C32')
+xlabel('C12')
+
+
+for (index = 1: length(time))
+   if (time(index) == 1.5 || time(index) == 3.1)
+      figure
+      DCMplot = plot(C12,C32);
+      txt = strcat('C32 vs C12 with label at t=', num2str(time(index)),'sec')
+      title(txt)
+      ylabel('C32')
+      xlabel('C12')
+      makedatatip(DCMplot,index)
+   end
+end
+text
+
+%% Quaternion
+% The quaternion constraint equation is desired for plotting
+
+% K_quat = quat_n(1,:).^2 + quat_n(2,:).^2 + quat_n(3,:).^2 + quat_n(4,:).^2;
+
+% figure
+% plot(time,quat_n(1,:),'-',time,quat_n(2,:),'-.',time,quat_n(3,:),'.',time,quat_n(4,:),'-',time,K_quat(:))
+% title('Euler parameter time history')
+% ylabel('euler parameters')
+% xlabel('time (s)')
+
+
+
+%% Euler Angle velocities
+% figure
+% plot(time,thetaDot(1,:), time,thetaDot(2,:), time,thetaDot(3,:))
+% title('Euler angular rate time history')
+% ylabel('euler angular velocities (rad/s)')
+% xlabel('time (s)')
 end

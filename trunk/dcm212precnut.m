@@ -12,7 +12,12 @@ nutation = acosd( DCM(2,2) ); % [0,180] bounds automatically checked by Matlab
 s2 = sind(nutation); % to be used in multiple steps
 
 % Next, we determine precession:
-theta(1,1) = asind( DCM(1,2) / s2 );
+% Ensure robustness against numerical inaccuracies.  Input for asind is in domain [-1,1]:
+temp = DCM(1,2) / s2;
+if (abs(temp) > 1)
+   temp = sign(temp);
+end
+theta(1,1) = asind( temp );
 
 if (theta(1,1) >=0)
    theta(1,2) = 180 - theta(1,1);
@@ -44,7 +49,12 @@ end
 % Next, we determine spin:
 theta = zeros(2,2);
 
-theta(1,1) = asind( DCM(2,1) / s2 );
+% Ensure robustness against numerical inaccuracies.  Input for asind is in domain [-1,1]:
+temp = DCM(2,1) / s2;
+if (abs(temp) > 1)
+   temp = sign(temp);
+end
+theta(1,1) = asind( temp );
 
 if (theta(1,1) >=0)
    theta(1,2) = 180 - theta(1,1);

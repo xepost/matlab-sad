@@ -13,7 +13,7 @@ J = 100; % kg-m^2
 K = (J-I)/I; % dimensionless
 
 tstep = 0.1; % sec
-tf    = 15;  % sec
+tf    = 30;  % sec
 
 % For b2 as axis of symmetry for axisymmetric body B:
 I_tensor = [I 0 0; 
@@ -27,7 +27,7 @@ E0 = [0 0 0 1];
 eig_mag = abs(w0(2) * K);
 
 
-[time,V] = ode45(@project1_kinematicDE, [0:tstep:tf], [1.0 1.5 -1.0 0 0 0 1]);
+[time,V] = ode45(@project1_ODE, [0:tstep:tf], [1.0 1.5 -1.0 0 0 0 1]);
 
 
 % At time t, angular velocity (rad/s) is:
