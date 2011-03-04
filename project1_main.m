@@ -45,6 +45,7 @@ for index = 1:length(time)
    [thetaDot(1,index), thetaDot(2,index), thetaDot(3,index)] = dcm212precnutrate(theta(:,index),w_n(:,index));
 end
 
-project1_plotting(time,w_n,w,quat_n,theta,thetaDot,C_NtoB)
+project1_output(time,tstep,w_n,w,C_NtoB,theta,thetaDot, quat_n(4,:))
+project1_plotting(time,w_n,w,C_NtoB,theta,thetaDot,quat_n)
 
 end
