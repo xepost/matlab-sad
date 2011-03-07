@@ -3,11 +3,12 @@ function [] = project1_main()
 % Assumptions:
 % Author: Karl Ludwig Fetzer
 
+% hold on; % This command allows plots to be overlaid for various cases
 close all; % This command closes all open figure windows
 clear;     % This command removes all variables from the workspace
 clc;       % This command removes all interactions from the command line
 
-T = 25;  % N-m
+T = 0;  % N-m
 I = 200; % kg-m^2
 J = 100; % kg-m^2
 K = (J-I)/I; % dimensionless
@@ -26,9 +27,17 @@ E0 = [0 0 0 1];
 
 eig_mag = abs(w0(2) * K);
 
+% options = odeset('RelTol',1e-4);
 
-[time,V] = ode45(@project1_ODE, [0:tstep:tf], [1.0 1.5 -1.0 0 0 0 1]);
+% This file handler uses an anonymous function so that the ode can handle extra
+% parameters as inputs to ode45.  Discussion  of this function's necessity is found here:
+% http://www.mathworks.com/matlabcentral/newsreader/view_thread/242818
+% Implementation is found here:
+% http://www.facstaff.bucknell.edu/maneval/help211/usingode45.pdf
 
+fileHandle = @(time,V) project1_ODE(time,V,T,I,K);
+
+[time,V] = ode45(fileHandle, [0:tstep:tf],[1.0 1.5 -1.0 0 0 0 1]);
 
 % At time t, angular velocity (rad/s) is:
 %time = 0:tstep:tf;
@@ -45,6 +54,7 @@ for index = 1:length(time)
    [thetaDot(1,index), thetaDot(2,index), thetaDot(3,index)] = dcm212precnutrate(theta(:,index),w_n(:,index));
 end
 
+project1_assessAccuracy(time,tstep,w_n,w,C_NtoB,theta,thetaDot, quat_n)
 project1_output(time,tstep,w_n,w,C_NtoB,theta,thetaDot, quat_n(4,:))
 project1_plotting(time,w_n,w,C_NtoB,theta,thetaDot,quat_n)
 
