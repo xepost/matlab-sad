@@ -13,9 +13,9 @@ scrsz = get(0,'ScreenSize');
 
 %% Angular velocity
 figure('Position',[scrsz(3)/4 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2])
-plot(time,w_n(1,:),'b-',time,w_n(2,:),'k-',time,w_n(3,:),'r-')
+plot(time,w_n(1,:),'b.',time,w_n(2,:),'k.',time,w_n(3,:),'r.')
 hold on
-plot(time,w(1,:),'b.', time,w(2,:),'k.', time,w(3,:),'r.')
+plot(time,w(1,:),'b-', time,w(2,:),'k-', time,w(3,:),'r-')
 title('Angular velocity time history')
 ylabel('angular velocity (rad/s)')
 xlabel('time (s)')
@@ -38,11 +38,18 @@ ylabel('nutation angle (degrees)')
 xlabel('time (s)')
 savefig('output/nutation',gcf,'eps');
 
-% figure
-% plot(time,theta(1,:), time,theta(2,:), time,theta(3,:))
-% title('Euler angle set time history')
-% ylabel('euler angles (degrees)')
-% xlabel('time (s)')
+% % figure('Position',[scrsz(3)/4 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2])
+% % plot(time,theta(3,:))
+% % title('Spin angle time history')
+% % ylabel('Spin angle (degrees)')
+% % xlabel('time (s)')
+% % savefig('output/nutation',gcf,'eps');
+
+% % figure
+% % plot(time,theta(1,:), time,theta(2,:), time,theta(3,:))
+% % title('Euler angle set time history')
+% % ylabel('euler angles (degrees)')
+% % xlabel('time (s)')
 
 %% Direction Cosine Matrix
 C12 = zeros(1,length(time));
@@ -51,43 +58,56 @@ C12(:) = C_NtoB(1,2,:);
 C32(:) = C_NtoB(3,2,:);
 
 figure('Position',[scrsz(3)/4 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2])
-DCMplot = plot(C12,C32);
+DCMplot = plot(C12,C32,'b');
 title('C32 vs C12')
 ylabel('C32')
 xlabel('C12')
-savefig('output/C12vsC32',gcf,'eps');
+savefig('output/C32vsC12',gcf,'eps');
 
 for (index = 1: length(time))
    if (time(index) == 1.5 || time(index) == 3.1)
       figure('Position',[scrsz(3)/4 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2])
-      DCMplot = plot(C12,C32);
+      DCMplot = plot(C12,C32,'b-');
       txt = strcat('C32 vs C12 with label at t=', num2str(time(index)),'sec');
       title(txt)
       ylabel('C32')
       xlabel('C12')
       makedatatip(DCMplot,index)
-      savefig(strcat('output/C12vsC32_at', num2str(index)),gcf,'eps');
+      % Not needed in normal plot
+         radius = C12(index)^2+C32(index)^2
+         hold on;
+         x = sqrt(radius)*cos(0:.01:2*pi);
+         y = sqrt(radius)*sin(0:.01:2*pi);
+         plot(x,y,'r-')
+         radius = 1;
+         x = sqrt(radius)*cos(0:.01:2*pi);
+         y = sqrt(radius)*sin(0:.01:2*pi);
+         plot(x,y,'k-')
+         axis equal
+         hold off
+      %
+      savefig(strcat('output/C32vsC12_at', num2str(index)),gcf,'eps');
    end
 end
 text
 
 %% Quaternion
-% The quaternion constraint equation is desired for plotting
-
-% K_quat = quat_n(1,:).^2 + quat_n(2,:).^2 + quat_n(3,:).^2 + quat_n(4,:).^2;
-
-% figure
-% plot(time,quat_n(1,:),'-',time,quat_n(2,:),'-.',time,quat_n(3,:),'.',time,quat_n(4,:),'-',time,K_quat(:))
-% title('Euler parameter time history')
-% ylabel('euler parameters')
-% xlabel('time (s)')
+% % % The quaternion constraint equation is desired for plotting
+% % 
+% % % K_quat = quat_n(1,:).^2 + quat_n(2,:).^2 + quat_n(3,:).^2 + quat_n(4,:).^2;
+% % 
+% % % figure
+% % % plot(time,quat_n(1,:),'-',time,quat_n(2,:),'-.',time,quat_n(3,:),'.',time,quat_n(4,:),'-',time,K_quat(:))
+% % % title('Euler parameter time history')
+% % % ylabel('euler parameters')
+% % % xlabel('time (s)')
 
 
 
 %% Euler Angle velocities
-% figure
-% plot(time,thetaDot(1,:), time,thetaDot(2,:), time,thetaDot(3,:))
-% title('Euler angular rate time history')
-% ylabel('euler angular velocities (rad/s)')
-% xlabel('time (s)')
+% % % figure
+% % % plot(time,thetaDot(1,:), time,thetaDot(2,:), time,thetaDot(3,:))
+% % % title('Euler angular rate time history')
+% % % ylabel('euler angular velocities (rad/s)')
+% % % xlabel('time (s)')
 end

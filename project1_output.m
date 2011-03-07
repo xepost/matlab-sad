@@ -42,8 +42,8 @@ C12_1hz_tex          = latex(sym(C12_1hz));
 C22_1hz_tex          = latex(sym(C22_1hz));
 C32_1hz_tex          = latex(sym(C32_1hz));
 theta_1hz_tex        = latex(sym(theta_1hz));
-thetaDot_1hz_tex     =  latex(sym(thetaDot_1hz));
-E4_1hz_tex           =  latex(sym(E4_1hz));
+thetaDot_1hz_tex     = latex(sym(thetaDot_1hz));
+E4_1hz_tex           = latex(sym(E4_1hz));
 
 % Save data to a LaTeX-readable file:
 save output/Project1Output.tex w_numerical_1hz_tex w_analytical_1hz_tex C12_1hz_tex C22_1hz_tex C32_1hz_tex theta_1hz_tex thetaDot_1hz_tex E4_1hz_tex -ascii 
