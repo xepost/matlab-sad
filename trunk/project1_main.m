@@ -14,7 +14,7 @@ J = 100; % kg-m^2
 K = (J-I)/I; % dimensionless
 
 tstep = 0.1; % sec
-tf    = 30;  % sec
+tf    = 12;  % sec
 
 % For b2 as axis of symmetry for axisymmetric body B:
 I_tensor = [I 0 0; 
@@ -24,6 +24,8 @@ I_tensor = [I 0 0;
 %Initial conditions:
 w0 = [1.0 1.5 -1.0]; % rad/s
 E0 = [0 0 0 1];
+
+H0 = dyadicRightDot(I_tensor,w0);
 
 eig_mag = abs(w0(2) * K);
 
