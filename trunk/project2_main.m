@@ -17,16 +17,16 @@ J = 200;     % kg-m^2
 K = (I-J)/I; % dimensionless
 
 orbit_step      = 0.05; % rev
-orbits_complete = 4;  % rev
+orbits_complete = 2;  % rev
 
 % For b2 as axis of symmetry for axisymmetric body B:
 I_tensor = [I 0 0; 
             0 J 0; 
             0 0 I];
          
-n = [-25,-15,0,1,5,10,15,25,35];
+n = [-5000,5000];
 
-psi_0 = [0,7,3.5]; % degrees
+psi_0 = [7]; % degrees
 
 for n_index = 1:length(n)
    s_star = n(n_index) - 1;
@@ -48,34 +48,65 @@ for n_index = 1:length(n)
 
    %Initial conditions:
    w0 = [0 n(n_index) 0]; % rad/s
-   E0 = [0 0 sind(psi_0(1)/2) cosd(psi_0(1)/2)];
-   [nu,V1] = ode45(fileHandle, [0:orbit_step:orbits_complete],[w0 E0]);
-   
-   E0 = [0 0 sind(psi_0(2)/2) cosd(psi_0(2)/2)];
-   [nu,V2] = ode45(fileHandle, [0:orbit_step:orbits_complete],[w0 E0]);
-   E0 = [0 0 sind(psi_0(3)/2) cosd(psi_0(3)/2)];
-   [nu,V3] = ode45(fileHandle, [0:orbit_step:orbits_complete],[w0 E0]);
+   E0 = [0 0 sind(psi_0/2) cosd(psi_0/2)];
+   [nu,V] = ode45(fileHandle, [0:orbit_step:orbits_complete],[w0 E0]);
 
    orbits(n_index,:)         = nu;
-   state_vector1(n_index,:,:) = V1;
-   state_vector2(n_index,:,:) = V2;
-   state_vector3(n_index,:,:) = V3;
-
+   state_vector(n_index,:,:) = V;
+   
 end
 
-sum1 = state_vector1(n_index,:,4).^2 + state_vector1(n_index,:,5).^2 + state_vector1(n_index,:,6).^2 + state_vector1(n_index,:,7).^2;
-sum2 = state_vector2(n_index,:,4).^2 + state_vector2(n_index,:,5).^2 + state_vector2(n_index,:,6).^2 + state_vector2(n_index,:,7).^2;
-sum3 = state_vector3(n_index,:,4).^2 + state_vector3(n_index,:,5).^2 + state_vector3(n_index,:,6).^2 + state_vector3(n_index,:,7).^2;
+zeta = nu' .* 360; % degrees
 
-c22 = 1 - 2.*state_vector1(:,:,6).^2 - 2.*state_vector1(:,:,4).^2;
-psi1 = acosd(c22);
 
-c22 = 1 - 2.*state_vector2(:,:,6).^2 - 2.*state_vector2(:,:,4).^2;
-psi2 = acosd(c22);
+sum = state_vector(n_index,:,4).^2 + state_vector(n_index,:,5).^2 + state_vector(n_index,:,6).^2 + state_vector(n_index,:,7).^2;
 
-c22 = 1 - 2.*state_vector3(:,:,6).^2 - 2.*state_vector3(:,:,4).^2;
-psi3 = acosd(c22);
-   
-project2_plotting(nu,state_vector1,n, psi1, psi2, psi3)
+c22 = 1 - 2.*state_vector(:,:,6).^2 - 2.*state_vector(:,:,4).^2;
+psi = acosd(c22);
+
+C12 = 2.* (state_vector(:,:,4).*state_vector(:,:,5) - state_vector(:,:,6).*state_vector(:,:,7));
+C32 = 2.* (state_vector(:,:,6).*state_vector(:,:,5) + state_vector(:,:,4).*state_vector(:,:,7));
+
+eta_candidate1 = asind( C12 ./ sind(psi) );
+eta_candidate2 = acosd( C32 ./ sind(psi) );
+for n_index = 1:length(n)
+   for nu_index = 1:length(nu)
+      % Quadrant Checking
+      if(eta_candidate1(n_index,nu_index) > 0)
+         eta11(n_index,nu_index) = eta_candidate1(n_index,nu_index);
+         eta12(n_index,nu_index) = real(180 - eta_candidate1(n_index,nu_index));
+      else
+         eta11(n_index,nu_index) = real(360 + eta_candidate1(n_index,nu_index));
+         eta12(n_index,nu_index) = real(180 + abs( eta_candidate1(n_index,nu_index)) );
+      end
+      
+      if(eta_candidate2(n_index,nu_index) > 0)
+         eta21(n_index,nu_index) = eta_candidate2(n_index,nu_index);
+         eta22(n_index,nu_index) = real(360 - eta_candidate2(n_index,nu_index));
+      else
+         eta21(n_index,nu_index) = real(360 + eta_candidate2(n_index,nu_index));
+         eta22(n_index,nu_index) = real(180 + (180-eta_candidate2(n_index,nu_index)));
+      end
+      
+      if ( abs(eta11(n_index,nu_index) - eta21(n_index,nu_index)) < 10 )
+         eta(n_index,nu_index) = eta11(n_index,nu_index);
+      elseif ( abs(eta11(n_index,nu_index) - eta22(n_index,nu_index)) < 10 )
+         eta(n_index,nu_index) = eta11(n_index,nu_index);
+      elseif ( abs(eta12(n_index,nu_index) - eta21(n_index,nu_index)) < 10 )
+         eta(n_index,nu_index) = eta12(n_index,nu_index);
+      elseif ( abs(eta12(n_index,nu_index) - eta22(n_index,nu_index)) < 10 )
+         eta(n_index,nu_index) = eta12(n_index,nu_index);
+      else
+         warning('None of the angles match.  Are you using the right DCM/body angle sequence?')
+         eta(n_index,nu_index) = 0;
+      end
+   end
+   eta(n_index,:) = (180/pi) * unwrap ((eta(n_index,:)-270)*pi/180);
+   phi(n_index,:) = eta(n_index,:)+zeta;
+end
+
+
+
+project2_plotting(nu,state_vector,n, psi, zeta, eta, phi)
 
 end
